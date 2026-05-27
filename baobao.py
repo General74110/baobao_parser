@@ -163,3 +163,26 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
+# ─── Cookie 管理 ──────────────────────────────────────
+
+def use_cookies(platform: str) -> dict:
+    """从CookieManager加载已保存的Cookie"""
+    try:
+        import sys, os
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies'))
+        from cookie_manager import CookieManager
+        cm = CookieManager()
+        return cm.get(platform)
+    except:
+        return {}
+
+
+async def refresh_cookies_async():
+    """异步刷新Cookie"""
+    import sys, os
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies'))
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies'))
+    from cookie_manager import run_all_refresh
+    await run_all_refresh()
+
