@@ -140,6 +140,8 @@ async def main():
         sys.exit(1)
     
     print(f"📝 {result.title or '(无标题)'}")
+    if result.video_url:
+        print(f"🎬 视频: ✅ 最高画质")
     if result.video_url: print(f"🎬 视频: {result.video_url[:80]}...")
     if result.images:    print(f"📸 图片 {len(result.images)}张")
     if result.cover_url: print(f"🖼️ 封面: 有")

@@ -54,7 +54,7 @@ class XiaohongshuParser:
         result.title = post.title or ''
         for media in (post.media or []):
             if media.type in ('video', 'livephoto'):
-                result.video_url = media.url
+                result.video_url = media.url  # 最高画质
                 if media.thumb_url: result.cover_url = media.thumb_url
             else:
                 result.images.append(media.url)

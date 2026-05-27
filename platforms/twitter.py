@@ -66,7 +66,7 @@ class TwitterParser:
         result.title = (tweet.full_text or '')[:200]
         for m in tweet.media:
             if hasattr(m, 'url') and m.url:
-                result.video_url = m.url
+                result.video_url = m.url  # 最高画质
             elif hasattr(m, 'url') and not result.video_url:
                 result.images.append(m.url)
     
