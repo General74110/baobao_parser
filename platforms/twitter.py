@@ -51,14 +51,24 @@ class TwitterParser:
     
     async def _algorithm(self, url, result):
         tw = Twitter()
+        # 从加密存储加载Cookie
+        try:
+            import sys, os
+            sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'cookies'))
+            from secure_manager import SecureCookieManager
+            cm = SecureCookieManager()
+            cookies = cm.get('twitter')
+            if cookies:
+                tw.cookie = cookies
+        except: pass
         tweet = await tw.fetch_tweet(url)
         result.success = True
-        result.title = (tweet.text or '')[:200]
-        if tweet.videos:
-            result.video_url = tweet.videos[0].url
-            result.cover_url = tweet.videos[0].thumb_url
-        elif tweet.photos:
-            result.images = [p.url for p in tweet.photos]
+        result.title = (tweet.full_text or '')[:200]
+        for m in tweet.media:
+            if hasattr(m, 'url') and m.url:
+                result.video_url = m.url
+            elif hasattr(m, 'url') and not result.video_url:
+                result.images.append(m.url)
     
     async def _browser(self, url, result):
         from playwright.async_api import async_playwright
