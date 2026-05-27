@@ -1,41 +1,49 @@
 #!/usr/bin/env python3
 """
-Cookie 设置工具 - 一个命令设置Twitter/Instagram Cookie
+Cookie 设置工具 - 加密存储，防止泄露
 """
 import asyncio, json, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cookie_manager import CookieManager
+
+from secure_manager import SecureCookieManager, run_all_refresh
 
 def main():
-    cm = CookieManager()
+    cm = SecureCookieManager()
     
     if len(sys.argv) < 3:
-        print("🐣 Cookie 管理器")
+        print("🔒 Cookie 管理器（加密存储）")
         print()
         print("用法:")
-        print("  python set_cookie.py twitter auth_token=xxx ct0=xxx")
+        print("  python set_cookie.py twitter auth_token=*** ct0=xxx")
         print("  python set_cookie.py instagram sessionid=xxx")
-        print("  python set_cookie.py status          # 查看状态")
-        print("  python set_cookie.py refresh         # 手动刷新")
+        print("  python set_cookie.py status           # 查看状态")
+        print("  python set_cookie.py refresh          # 手动刷新")
         print()
         print("当前状态:")
-        for k, v in cm.status().items():
-            print(f"  {k}: {v}")
+        st = cm.status()
+        if st:
+            for k, v in st.items():
+                print(f"  {k}: {v}")
+        else:
+            print("  (无已保存的Cookie)")
         return
     
     cmd = sys.argv[1]
     
     if cmd == 'status':
-        print("📋 Cookie状态:")
-        for k, v in cm.status().items():
-            print(f"  {k}: {v}")
+        st = cm.status()
+        print("🔒 Cookie状态:")
+        if st:
+            for k, v in st.items():
+                print(f"  {k}: {v}")
+        else:
+            print("  (无已保存的Cookie)")
     
     elif cmd == 'refresh':
         print("🔄 手动刷新所有Cookie...")
-        asyncio.run(refresh_all(cm))
+        asyncio.run(run_all_refresh())
     
     else:
-        # 设置Cookie: twitter auth_token=xxx ct0=xxx
         platform = cmd
         cookie_dict = {}
         for arg in sys.argv[2:]:
@@ -45,22 +53,9 @@ def main():
         
         if cookie_dict:
             cm.set(platform, cookie_dict)
-            print(f"✅ {platform} Cookie已设置!")
-            print(f"   自动续期已启用，每天刷新保证不过期")
-
-
-async def refresh_all(cm):
-    from cookie_manager import auto_refresh_twitter, auto_refresh_instagram
-    
-    if cm.is_valid('twitter') or cm.get('twitter'):
-        print("  Twitter: ", end='')
-        ok = await auto_refresh_twitter(cm)
-        print(f"  {'✅' if ok else '❌'}")
-    
-    if cm.is_valid('instagram') or cm.get('instagram'):
-        print("  Instagram: ", end='')
-        ok = await auto_refresh_instagram(cm)
-        print(f"  {'✅' if ok else '❌'}")
+            print(f"✅ {platform} Cookie已加密保存!")
+            print(f"   自动续期已启用，每6小时刷新")
+            print(f"   密钥已隔离，不会提交到Git")
 
 
 if __name__ == '__main__':
